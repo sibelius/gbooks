@@ -1,0 +1,48 @@
+import scrapy
+from scrapy.http import Request
+
+class GBooksSpider(scrapy.Spider):
+    name = "gbooks"
+    allowed_domains = ["books.google.com", "books.google.com.br"]
+
+'''
+This is the url format to make a search request for google books
+https://books.google.com.br/books
+     ?id=ztrj8aph-4sC
+     &printsec=frontcover
+     &dq=isbn:141290224X
+     &hl=pt-BR
+     &sa=X
+     &ei=IYGYVP-LM5X-sAT41IGgBg
+     &ved=0CBQQ6AEwAA
+     &jscmd=SearchWithinVolume&q= <<word or phrase to research>>
+     &scoring=r
+'''
+    book_id = "ztrj8aph-4sC"
+    book_isbn = "141290224X"
+    book_ei = "IYGYVP-LM5X-sAT41IGgBg"
+    book_ved = "0CBQQ6AEwAA"
+
+    term = "notebook" # the ideia is to grow the search terms
+
+    def start_requests(self):
+        # generate request url to download the book
+        req = Request("https://books.google.com.br/books?id=" + \
+                book_id + \
+                "&printsec=frontcover&dq=isbn:" + \
+                book_isbn + \
+                "&hl=pt-BR&sa=X&ei=" + \
+                book_ei + \
+                "&ved=" + \
+                book_ved + \
+                "&jscmd=SearchWithinVolume&q="
+                term + \
+                        "&scoring=r")
+        return req
+
+    def parse(self, response):
+        # parse the response
+        filename = response.url.split("/")[-2]
+        with open(filename, "wb") as f:
+            f.write(response.body)
+
